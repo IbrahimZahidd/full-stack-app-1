@@ -1,0 +1,16 @@
+### Scrape Products
+POST http://localhost:3000/products/scrape
+Content-Type: application/json
+
+
+# GET http://localhost:3000/users
+
+
+# POST http://localhost:3000/users
+# Content-Type: application/json
+
+# {
+#   "name": "John Doe",
+#   "email": "john.doe@example.com"
+# }
+
