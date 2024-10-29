@@ -5,6 +5,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/user.module'; // Import your Users module
 import { ProductsModule } from './products/products.module'; // Import ProductsModule
+import { SearchModule } from './elasticsearch/elasticsearch.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { ProductsModule } from './products/products.module'; // Import ProductsM
     }),
     UsersModule,
     ProductsModule,
+    SearchModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -5,12 +5,15 @@ import { Repository } from 'typeorm';
 import { Product } from './product.entity';
 import axios from 'axios';
 import * as cheerio from 'cheerio';
+import { ElasticsearchService } from '@nestjs/elasticsearch';
+import { SearchResponse } from '@elastic/elasticsearch/lib/api/types'; // Adjust the path if necessary
 
 @Injectable()
 export class ProductsService {
   constructor(
     @InjectRepository(Product)
     private productsRepository: Repository<Product>,
+    private readonly elasticsearchService: ElasticsearchService,
   ) {}
 
   async scrapeProducts() {
@@ -28,7 +31,14 @@ export class ProductsService {
           .text()
           .trim();
 
-        products.push({ imageUrl, price, description });
+        const product = { imageUrl, price, description };
+        products.push(product);
+
+        // Index the product into Elasticsearch
+        this.elasticsearchService.index({
+          index: 'products',
+          body: product,
+        });
       });
     }
 
@@ -39,5 +49,23 @@ export class ProductsService {
 
   async findAll(): Promise<Product[]> {
     return this.productsRepository.find();
+  }
+
+  async searchProducts(query: string): Promise<Product[]> {
+    const response: SearchResponse<Product> =
+      await this.elasticsearchService.search<Product>({
+        index: 'products',
+        body: {
+          query: {
+            multi_match: {
+              query,
+              fields: ['description', 'price'],
+            },
+          },
+        },
+      });
+
+    // Check if there are hits before mapping
+    return response.hits.hits.map((hit) => hit._source);
   }
 }
